@@ -142,6 +142,8 @@ public class BPFormatter {
      * @return A string of formatted time.
      */
     public static String formatTime(long milliseconds) {
+        if (milliseconds <= 0) return "0" + ConfigValues.getSeconds();
+
         long seconds = milliseconds / 1000;
         long minutes = seconds / 60;
         long hours = minutes / 60;
@@ -205,6 +207,15 @@ public class BPFormatter {
             format = format.replace("%" + identifier, replacer);
         }
 
+        // Avoid leaving " and " / ", " hanging when lower units are 0, or an empty string.
+        String finalSeparator = ConfigValues.getInterestTimeFinalSeparator();
+        String separator = ConfigValues.getInterestTimeSeparator();
+        while (finalSeparator != null && !finalSeparator.isEmpty() && format.endsWith(finalSeparator))
+            format = format.substring(0, format.length() - finalSeparator.length());
+        while (separator != null && !separator.isEmpty() && format.endsWith(separator))
+            format = format.substring(0, format.length() - separator.length());
+
+        if (format.isEmpty()) return "0" + ConfigValues.getSeconds();
         return format;
     }
 
