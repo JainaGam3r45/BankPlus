@@ -443,7 +443,6 @@ public class BPEconomy {
      * @param p The player.
      */
     public BigDecimal getDebt(OfflinePlayer p) {
-        if (!isPlayerLoaded(p)) return BigDecimal.ZERO;
         return getHolder(p).debt;
     }
 
@@ -466,7 +465,6 @@ public class BPEconomy {
      * @return The current bank level.
      */
     public int getBankLevel(OfflinePlayer p) {
-        if (!isPlayerLoaded(p)) return 1;
         return getHolder(p).bankLevel;
     }
 
