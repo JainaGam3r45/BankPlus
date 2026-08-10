@@ -13,6 +13,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.PlayerInventory;
 
 import java.util.*;
 
@@ -110,7 +111,16 @@ public class GiveRequiredItemsCmd extends BPCommand {
         return new BPCmdExecution() {
             @Override
             public void execute() {
-                for (Bank.RequiredItem requiredItem : givenItems) target.getInventory().addItem(requiredItem.item);
+                PlayerInventory inventory = target.getInventory();
+
+                for (Bank.RequiredItem requiredItem : givenItems) {
+                    ItemStack item = requiredItem.item.clone();
+                    item.setAmount(requiredItem.amount);
+
+                    HashMap<Integer, ItemStack> leftover = inventory.addItem(item);
+                    if (!leftover.isEmpty())
+                        leftover.values().forEach(stack -> target.getWorld().dropItemNaturally(target.getLocation(), stack));
+                }
             }
         };
     }
