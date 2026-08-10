@@ -132,7 +132,7 @@ public class BPMessages {
         if (!messages.containsKey("Prefix")) messagesPrefix = BPChat.PREFIX;
         else {
             List<String> prefixes = messages.get("Prefix");
-            messagesPrefix = prefixes.isEmpty() ? BPChat.PREFIX : prefixes.getFirst();
+            messagesPrefix = prefixes.isEmpty() ? BPChat.PREFIX : prefixes.get(0);
         }
 
         alertMissingMessages = config.getBoolean("Enable-Missing-Message-Alert");

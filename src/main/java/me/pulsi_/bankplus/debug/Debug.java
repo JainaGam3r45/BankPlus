@@ -42,7 +42,9 @@ public class Debug {
             BPMessages.sendMessage(debugReceiver, " ");
             BPMessages.sendMessage(debugReceiver, "|  Sorting the first " + ConfigValues.getBankTopSize() + " players with the highest balance.");
             for (int i = 1; i <= ConfigValues.getBankTopSize(); i++) {
-                BankTopPlayer highestPlayerBal = players.getFirst();
+                if (players.isEmpty()) break;
+
+                BankTopPlayer highestPlayerBal = players.get(0);
 
                 for (BankTopPlayer player : players)
                     if (player.getBalance().compareTo(highestPlayerBal.getBalance()) > 0)

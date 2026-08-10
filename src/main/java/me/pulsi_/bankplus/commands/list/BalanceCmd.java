@@ -95,7 +95,7 @@ public class BalanceCmd extends BPCommand {
                             BPUtils.placeValues(p, BPEconomy.getBankBalancesSum(p))
                     );
                 else {
-                    Bank bank = banks.getFirst();
+                    Bank bank = banks.get(0);
                     BPMessages.sendIdentifier(
                             p,
                             "Personal-Bank",

@@ -45,7 +45,7 @@ public class BankListGui extends BankGui {
         if (MultipleBanksValues.isDirectlyOpenIf1IsAvailable()) {
             List<Bank> availableBanks = BankUtils.getAvailableBanks(p);
             if (availableBanks.size() == 1) {
-                availableBanks.getFirst().getBankGui().openBankGui(p);
+                availableBanks.get(0).getBankGui().openBankGui(p);
                 return;
             }
         }

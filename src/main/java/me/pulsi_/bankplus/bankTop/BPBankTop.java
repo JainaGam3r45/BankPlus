@@ -44,7 +44,9 @@ public class BPBankTop {
 
             bankTop.clear();
             for (int i = 1; i <= ConfigValues.getBankTopSize(); i++) {
-                BankTopPlayer highestPlayerBal = players.getFirst();
+                if (players.isEmpty()) break;
+
+                BankTopPlayer highestPlayerBal = players.get(0);
 
                 for (BankTopPlayer player : players)
                     if (player.getBalance().compareTo(highestPlayerBal.getBalance()) > 0)

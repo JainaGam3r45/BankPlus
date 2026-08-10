@@ -106,7 +106,7 @@ public class ViewCmd extends BPCommand {
                                 BPUtils.placeValues(target, BPEconomy.getBankBalancesSum(target))
                         );
                     else {
-                        Bank bank = banks.getFirst();
+                        Bank bank = banks.get(0);
                         BPMessages.sendIdentifier(
                                 s,
                                 "Bank-Others",

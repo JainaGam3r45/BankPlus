@@ -50,7 +50,7 @@ public class MainCmd implements CommandExecutor, TabCompleter {
                     if (!MultipleBanksValues.isDirectlyOpenIf1IsAvailable()) new BankListGui().openBankGui(p);
                     else {
                         List<Bank> availableBanks = BankUtils.getAvailableBanks(p);
-                        if (availableBanks.size() == 1) availableBanks.getFirst().getBankGui().openBankGui(p);
+                        if (availableBanks.size() == 1) availableBanks.get(0).getBankGui().openBankGui(p);
                         else new BankListGui().openBankGui(p);
                     }
                 }
