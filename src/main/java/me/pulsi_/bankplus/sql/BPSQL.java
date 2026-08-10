@@ -1,7 +1,6 @@
 package me.pulsi_.bankplus.sql;
 
 import me.pulsi_.bankplus.BankPlus;
-import me.pulsi_.bankplus.bankSystem.BankRegistry;
 import me.pulsi_.bankplus.economy.BPEconomy;
 import me.pulsi_.bankplus.utils.BPLogger;
 import me.pulsi_.bankplus.values.ConfigValues;
@@ -13,17 +12,10 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
- * BankPlus MySQL system save both database and files to synchronize
- * them, local files data is always available and updated, and will
- * be updated on the database.
- * <p>
- * In case the database is not available or the connection has been
- * closed, the data will continue to be saved locally, and once the
- * database will connect again the local data will be updated.
+ * BankPlus SQL storage (MySQL or SQLite). Player balances are saved
+ * here only; old playerdata files can still be imported with /bank transfer.
  */
 public class BPSQL {
 
@@ -64,12 +56,9 @@ public class BPSQL {
      * @return The argument based on the specified player.
      */
     public static String GET_DEFAULT_PLAYER_ARGUMENTS(OfflinePlayer p, String bankName) {
-        return p.getUniqueId() + "," +
-                p.getName() + "," +
-                "1," +
-                (ConfigValues.getMainGuiName().equals(bankName) ? ConfigValues.getStartAmount() : "0") + "," +
-                "0," +
-                "0";
+        String name = p.getName() == null ? "" : p.getName().replace("'", "''");
+        String money = ConfigValues.getMainGuiName().equals(bankName) ? ConfigValues.getStartAmount().toPlainString() : "0";
+        return "'" + p.getUniqueId() + "','" + name + "','1','" + money + "','0','0'";
     }
 
     private static Connection connection;
@@ -99,11 +88,11 @@ public class BPSQL {
      *
      * @param player   The player.
      * @param bankName The bank.
-     * @return The bank level or 0 if not found.
+     * @return The bank level or 1 if not found.
      */
     public static int getBankLevel(OfflinePlayer player, String bankName) {
         String level = get(player, bankName, SQLSearch.BANK_LEVEL);
-        if (level.isEmpty()) return 0;
+        if (level.isEmpty()) return 1;
 
         return Integer.parseInt(level);
     }
@@ -151,14 +140,14 @@ public class BPSQL {
     }
 
     /**
-     * Set the debt of the specified player in the specified bank to the selected amount.
+     * Set the bank level of the specified player in the specified bank.
      *
      * @param player   The player.
      * @param bankName The bank.
-     * @param newValue The new value for the money.
+     * @param newValue The new level.
      */
     public static void setBankLevel(OfflinePlayer player, String bankName, BigDecimal newValue) {
-        set(player, bankName, SQLSearch.INTEREST, newValue.toPlainString());
+        set(player, bankName, SQLSearch.BANK_LEVEL, newValue.toPlainString());
     }
 
     /**
@@ -166,10 +155,10 @@ public class BPSQL {
      *
      * @param player   The player.
      * @param bankName The bank.
-     * @param newValue The new value for the money.
+     * @param newValue The new debt.
      */
     public static void setDebt(OfflinePlayer player, String bankName, BigDecimal newValue) {
-        set(player, bankName, SQLSearch.INTEREST, newValue.toPlainString());
+        set(player, bankName, SQLSearch.DEBT, newValue.toPlainString());
     }
 
     /**
@@ -208,10 +197,10 @@ public class BPSQL {
         String debt = bankEconomy.getDebt(player).toPlainString();
         String money = bankEconomy.getBankBalance(player).toPlainString();
 
-        String insert = "INSERT INTO " + bankName + " (uuid, bank_level, debt, money) " + "VALUES(" +
-                player.getUniqueId() + ", " + level + ", " + debt + ", " + money + ")";
+        String insert = "INSERT INTO " + bankName + " (uuid, bank_level, debt, money) VALUES('" +
+                player.getUniqueId() + "', '" + level + "', '" + debt + "', '" + money + "')";
 
-        String set = "bank_level='" + level + "', " + "debt='" + debt + "', " + "money='" + money + "'";
+        String set = "bank_level='" + level + "', debt='" + debt + "', money='" + money + "'";
 
         String query;
         if (ConfigValues.isMySqlEnabled()) query = insert + " ON DUPLICATE KEY UPDATE " + set;
@@ -297,7 +286,9 @@ public class BPSQL {
                     connection.prepareStatement(query).execute();
                 }
             } catch (SQLException e) {
+                connection = null;
                 BPLogger.Console.error(e, "Could not connect to MySQL database.");
+                return;
             }
             BPLogger.Console.info("MySQL database successfully connected.");
         }
@@ -363,6 +354,7 @@ public class BPSQL {
         }
 
         try {
+            if (!set.next()) return "";
             return set.getString(columnName);
         } catch (SQLException e) {
             BPLogger.Console.error(e, "Could not get data for player " + player.getName() + ".");
@@ -395,7 +387,7 @@ public class BPSQL {
 
         String query;
 
-        String insert = "INSERT INTO " + bankName + " (uuid, " + columnName + ") VALUES(" + player.getUniqueId() + ", " + newValue + ")";
+        String insert = "INSERT INTO " + bankName + " (uuid, " + columnName + ") VALUES('" + player.getUniqueId() + "', '" + newValue + "')";
         String set = columnName + "='" + newValue + "'";
         if (ConfigValues.isMySqlEnabled()) query = insert + " ON DUPLICATE KEY UPDATE " + set;
         else query = insert + " ON CONFLICT(uuid) DO UPDATE SET " + set;
