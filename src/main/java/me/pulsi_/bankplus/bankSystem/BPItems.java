@@ -2,7 +2,6 @@ package me.pulsi_.bankplus.bankSystem;
 
 import com.destroystokyo.paper.profile.PlayerProfile;
 import com.destroystokyo.paper.profile.ProfileProperty;
-import io.papermc.paper.datacomponent.DataComponentTypes;
 import me.pulsi_.bankplus.utils.BPLogger;
 import me.pulsi_.bankplus.utils.texts.BPChat;
 import net.kyori.adventure.text.Component;
@@ -10,6 +9,7 @@ import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -77,7 +77,7 @@ public class BPItems {
         }
         item.setItemMeta(meta);
 
-        if (itemSection.getBoolean(GLOWING_KEY)) item.setData(DataComponentTypes.ENCHANTMENT_GLINT_OVERRIDE, true);
+        if (itemSection.getBoolean(GLOWING_KEY)) applyGlowing(item);
         return item;
     }
 
@@ -120,8 +120,26 @@ public class BPItems {
         }
         item.setItemMeta(meta);
 
-        if (itemSection.getBoolean(GLOWING_KEY)) item.setData(DataComponentTypes.ENCHANTMENT_GLINT_OVERRIDE, true);
+        if (itemSection.getBoolean(GLOWING_KEY)) applyGlowing(item);
         return item;
+    }
+
+    /**
+     * Apply glowing using Paper data components when available, otherwise a hidden enchant.
+     */
+    private static void applyGlowing(ItemStack item) {
+        try {
+            Class<?> types = Class.forName("io.papermc.paper.datacomponent.DataComponentTypes");
+            Object glint = types.getField("ENCHANTMENT_GLINT_OVERRIDE").get(null);
+            Class<?> componentType = Class.forName("io.papermc.paper.datacomponent.DataComponentType");
+            item.getClass().getMethod("setData", componentType, Object.class).invoke(item, glint, Boolean.TRUE);
+        } catch (Throwable t) {
+            ItemMeta meta = item.getItemMeta();
+            if (meta == null) return;
+            meta.addEnchant(Enchantment.LURE, 1, true);
+            meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
+            item.setItemMeta(meta);
+        }
     }
 
     /**
@@ -150,6 +168,8 @@ public class BPItems {
             String[] itemData = material.split(":");
             try {
                 result = new ItemStack(Material.valueOf(itemData[0]), 1, Byte.parseByte(itemData[1]));
+            } catch (NoSuchMethodError e) { // Newer versions removed material data values.
+                result = new ItemStack(Material.valueOf(itemData[0]));
             } catch (IllegalArgumentException e) {
                 BPLogger.Console.warn("Could not update item because \"" + itemData[0] + "\" is not a valid material!");
             }

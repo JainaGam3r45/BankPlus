@@ -29,6 +29,19 @@ import java.util.List;
 public class BPUtils {
 
     /**
+     * Read a MiniMessage component from the config.
+     * Falls back to string deserialize on older Paper builds without getComponent.
+     */
+    public static Component getComponent(FileConfiguration config, String path) {
+        try {
+            return config.getComponent(path, MiniMessage.miniMessage());
+        } catch (NoSuchMethodError e) {
+            String value = config.getString(path);
+            return value == null || value.isEmpty() ? Component.empty() : MiniMessage.miniMessage().deserialize(value);
+        }
+    }
+
+    /**
      * BankPlus does not accept negative numbers, if a number is lower than 0, it will return true.
      *
      * @param number The number to check.
