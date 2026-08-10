@@ -42,6 +42,38 @@ public class BPUtils {
     }
 
     /**
+     * Resolve a player by name without relying only on hasPlayedBefore().
+     * On newer Paper builds, getOfflinePlayer(name) may return a player that never
+     * joined this server even when they are online or cached.
+     */
+    public static OfflinePlayer getOfflinePlayer(String name) {
+        if (name == null || name.isEmpty()) return null;
+
+        Player online = Bukkit.getPlayerExact(name);
+        if (online != null) return online;
+
+        try {
+            OfflinePlayer cached = Bukkit.getOfflinePlayerIfCached(name);
+            if (cached != null) return cached;
+        } catch (NoSuchMethodError ignored) {
+            // Older servers don't have getOfflinePlayerIfCached.
+        }
+
+        for (OfflinePlayer offline : Bukkit.getOfflinePlayers()) {
+            if (offline.getName() != null && offline.getName().equalsIgnoreCase(name)) return offline;
+        }
+
+        return Bukkit.getOfflinePlayer(name);
+    }
+
+    /**
+     * Check if the offline player is valid for BankPlus commands.
+     */
+    public static boolean isValidPlayer(OfflinePlayer player) {
+        return player != null && (player.isOnline() || player.hasPlayedBefore());
+    }
+
+    /**
      * BankPlus does not accept negative numbers, if a number is lower than 0, it will return true.
      *
      * @param number The number to check.

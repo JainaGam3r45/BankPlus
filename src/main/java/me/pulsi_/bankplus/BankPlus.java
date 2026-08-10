@@ -68,8 +68,14 @@ public final class BankPlus extends JavaPlugin {
             return;
         }
 
-        String v = getServer().getVersion();
-        serverVersion = v.substring(v.lastIndexOf("MC:"), v.length() - 1).replace("MC: ", "");
+        try {
+            serverVersion = Bukkit.getMinecraftVersion();
+        } catch (NoSuchMethodError e) {
+            String v = getServer().getVersion();
+            int mcIndex = v.lastIndexOf("MC:");
+            if (mcIndex >= 0) serverVersion = v.substring(mcIndex + 3).replace(")", "").trim();
+            else serverVersion = v;
+        }
 
         this.bpConfigs = new BPConfigs(this);
         this.bpData = new BPData(this);
