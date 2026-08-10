@@ -49,10 +49,9 @@ public class PlayerServerListener implements Listener {
             }
 
             BigDecimal finalAmount = amount;
-            String mess = BPMessages.applyMessagesPrefix(ConfigValues.getOfflineInterestMessage());
             if (finalAmount.compareTo(BigDecimal.ZERO) > 0)
                 Bukkit.getScheduler().runTaskLater(BankPlus.INSTANCE(), () ->
-                                BPMessages.sendMessage(p, mess, BPUtils.placeValues(finalAmount)),
+                                BPMessages.sendMessage(p, ConfigValues.getOfflineInterestMessage(), BPUtils.placeValues(finalAmount)),
                         ConfigValues.getNotifyOfflineInterestDelay() * 20L);
         });
     }

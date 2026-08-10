@@ -7,6 +7,7 @@ import me.pulsi_.bankplus.bankSystem.BankUtils;
 import me.pulsi_.bankplus.utils.texts.BPFormatter;
 import me.pulsi_.bankplus.utils.texts.BPMessages;
 import me.pulsi_.bankplus.values.ConfigValues;
+import me.clip.placeholderapi.PlaceholderAPI;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.title.Title;
@@ -170,6 +171,10 @@ public class BPUtils {
      */
     public static void sendTitle(String titleString, Player p) {
         if (titleString == null || p == null) return;
+
+        titleString = BPMessages.applyMessagesPrefix(titleString);
+        if (BankPlus.INSTANCE().isPlaceholderApiHooked())
+            titleString = PlaceholderAPI.setPlaceholders(p, titleString);
 
         MiniMessage mm = MiniMessage.miniMessage();
         Component title, subtitle;
