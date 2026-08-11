@@ -50,11 +50,11 @@ public class BPConfigs {
         FileConfiguration savesConfig = YamlConfiguration.loadConfiguration(file);
         if (updated) {
             String v = savesConfig.getString("version");
-            updated = v != null && v.equals(plugin.getDescription().getVersion());
+            updated = v != null && v.equals(plugin.getPluginMeta().getVersion());
         }
 
-        savesConfig.options().header("DO NOT EDIT / REMOVE THIS FILE OR BANKPLUS MAY GET RESET!");
-        savesConfig.set("version", plugin.getDescription().getVersion());
+        savesConfig.options().setHeader(List.of("DO NOT EDIT / REMOVE THIS FILE OR BANKPLUS MAY GET RESET!"));
+        savesConfig.set("version", plugin.getPluginMeta().getVersion());
 
         try {
             savesConfig.save(file);
@@ -140,14 +140,12 @@ public class BPConfigs {
         }
         copyStream(plugin.getResource(fileName), out);
 
-        Scanner scanner;
-        try {
-            scanner = new Scanner(fileToScan, "UTF-8");
+        try (Scanner scanner = new Scanner(fileToScan, "UTF-8")) {
+            while (scanner.hasNext()) fileAsList.add(scanner.nextLine());
         } catch (FileNotFoundException e) {
             BPLogger.Console.warn(e, "Could not find \"" + fileName + "\" file!");
             return;
         }
-        while (scanner.hasNext()) fileAsList.add(scanner.nextLine());
 
         for (int i = 0; i < fileAsList.size(); i++) {
             String line = fileAsList.get(i);

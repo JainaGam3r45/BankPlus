@@ -11,7 +11,6 @@ import me.pulsi_.bankplus.events.BPPreTransactionEvent;
 import me.pulsi_.bankplus.listeners.playerChat.PlayerChatMethod;
 import me.pulsi_.bankplus.sql.BPSQL;
 import me.pulsi_.bankplus.utils.BPUtils;
-import me.pulsi_.bankplus.utils.texts.BPFormatter;
 import me.pulsi_.bankplus.utils.texts.BPMessages;
 import me.pulsi_.bankplus.values.ConfigValues;
 import me.pulsi_.bankplus.values.MessageValues;
@@ -19,7 +18,6 @@ import net.milkbowl.vault.economy.Economy;
 import net.milkbowl.vault.economy.EconomyResponse;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
-import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 
 import java.math.BigDecimal;
@@ -32,16 +30,17 @@ public class BPEconomy {
     private final HashMap<UUID, Holder> holders = new HashMap<>();
     private final Set<UUID> operations = new HashSet<>();
 
-    private final String moneyPath, interestPath, debtPath, levelPath;
+    // Not used anymore after the SQL saving rewrite. Keep for now, delete later if still unused.
+    // private final String moneyPath, interestPath, debtPath, levelPath;
 
     public BPEconomy(Bank originBank) {
         this.originBank = originBank;
 
-        String bankName = originBank.getIdentifier();
-        this.moneyPath = "banks." + bankName + ".money";
-        this.interestPath = "banks." + bankName + ".interest";
-        this.debtPath = "banks." + bankName + ".debt";
-        this.levelPath = "banks." + bankName + ".level";
+        // String bankName = originBank.getIdentifier();
+        // this.moneyPath = "banks." + bankName + ".money";
+        // this.interestPath = "banks." + bankName + ".interest";
+        // this.debtPath = "banks." + bankName + ".debt";
+        // this.levelPath = "banks." + bankName + ".level";
     }
 
     /**

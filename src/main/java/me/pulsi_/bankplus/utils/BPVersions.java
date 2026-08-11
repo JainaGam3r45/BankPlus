@@ -22,20 +22,17 @@ public class BPVersions {
         File configFile = BankPlus.INSTANCE().getConfigs().getFile("config.yml");
         if (configFile == null || !configFile.exists()) return;
 
-        Scanner scanner;
-        try {
-            scanner = new Scanner(configFile, "UTF-8");
+        boolean contains = false;
+        StringBuilder builder = new StringBuilder();
+        try (Scanner scanner = new Scanner(configFile, "UTF-8")) {
+            while (scanner.hasNext()) {
+                String nextLine = scanner.nextLine();
+                if (nextLine.contains("Money-Given:") || nextLine.contains("Offline-Money-Given:")) contains = true;
+                builder.append(nextLine.replace("Money-Given:", "Rate:").replace("Offline-Money-Given:", "Offline-Rate:")).append("\n");
+            }
         } catch (FileNotFoundException e) {
             BPLogger.Console.warn(e, "Could not convert \"" + configFile + "\" interest money-given and offline-money-given paths!");
             return;
-        }
-
-        boolean contains = false;
-        StringBuilder builder = new StringBuilder();
-        while (scanner.hasNext()) {
-            String nextLine = scanner.nextLine();
-            if (nextLine.contains("Money-Given:") || nextLine.contains("Offline-Money-Given:")) contains = true;
-            builder.append(nextLine.replace("Money-Given:", "Rate:").replace("Offline-Money-Given:", "Offline-Rate:")).append("\n");
         }
 
         if (!contains) return;
@@ -108,21 +105,18 @@ public class BPVersions {
         if (files == null) return;
 
         for (File bankFile : files) {
-            Scanner scanner;
-            try {
-                scanner = new Scanner(bankFile, "UTF-8");
+            boolean convertFile = false;
+            StringBuilder builder = new StringBuilder();
+            try (Scanner scanner = new Scanner(bankFile, "UTF-8")) {
+                while (scanner.hasNext()) {
+                    String nextLine = scanner.nextLine();
+                    if (nextLine.contains("Upgrades:")) convertFile = true;
+
+                    builder.append(nextLine.replace("Upgrades:", "Levels:")).append("\n");
+                }
             } catch (FileNotFoundException e) {
                 BPLogger.Console.warn(e, "Could not find \"" + bankFile + "\" file!");
                 continue;
-            }
-
-            boolean convertFile = false;
-            StringBuilder builder = new StringBuilder();
-            while (scanner.hasNext()) {
-                String nextLine = scanner.nextLine();
-                if (nextLine.contains("Upgrades:")) convertFile = true;
-
-                builder.append(nextLine.replace("Upgrades:", "Levels:")).append("\n");
             }
             if (!convertFile) continue;
 

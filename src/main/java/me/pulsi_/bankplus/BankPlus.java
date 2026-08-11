@@ -127,7 +127,7 @@ public final class BankPlus extends JavaPlugin {
     }
 
     public static boolean isAlphaVersion() {
-        return INSTANCE.getDescription().getVersion().toLowerCase().contains("-alpha");
+        return INSTANCE.getPluginMeta().getVersion().toLowerCase().contains("-alpha");
     }
 
     public Economy getVaultEconomy() {
@@ -183,13 +183,12 @@ public final class BankPlus extends JavaPlugin {
     }
 
     private boolean isPluginUpdated() {
-        String newVersion = getDescription().getVersion();
+        String newVersion = getPluginMeta().getVersion();
         boolean updated = true;
-        try {
-            newVersion = new BufferedReader(new InputStreamReader(
-                    URI.create("https://api.spigotmc.org/legacy/update.php?resource=93130").toURL().openConnection().getInputStream()
-            )).readLine();
-
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(
+                URI.create("https://api.spigotmc.org/legacy/update.php?resource=93130").toURL().openConnection().getInputStream()
+        ))) {
+            newVersion = reader.readLine();
             updated = actualVersion.equals(newVersion);
         } catch (Exception e) {
             BPLogger.Console.warn("Could not check for updates. (No internet connection)");
@@ -204,7 +203,7 @@ public final class BankPlus extends JavaPlugin {
             // Even if the info is disabled, notify when there is a new update
             // because it is important to keep users at the latest version.
             BPLogger.Console.info("New version of the plugin available! (v" + newVersion + ").");
-            BPLogger.Console.info("Please download the latest version here: https://www.spigotmc.org/resources/%E2%9C%A8-bankplus-%E2%9C%A8.93130/.");
+            BPLogger.Console.info("Please download the latest version here: https://www.spigotmc.org/resources/93130/.");
         }
         return updated;
     }

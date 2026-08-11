@@ -21,7 +21,7 @@ public class UpdateChecker implements Listener {
         if (!BankPlus.INSTANCE().isUpdated())
             message = BPChat.PREFIX + " <green>A new update is available! " +
                     "<hover:show_text:'<aqua>Click to download it!'>" +
-                    "<click:open_url:https://www.spigotmc.org/resources/%E2%9C%A8-bankplus-%E2%9C%A8.93130/>" +
+                    "<click:open_url:https://www.spigotmc.org/resources/93130/>" +
                     "<aqua>[INFO]";
         else if (BankPlus.isAlphaVersion())
             message = BPChat.PREFIX + " <aqua>You are using an alpha " +

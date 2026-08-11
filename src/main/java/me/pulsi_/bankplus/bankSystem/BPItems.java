@@ -17,7 +17,6 @@ import org.bukkit.inventory.meta.SkullMeta;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 /**
  * Utility class about ItemStacks and Material generation.
@@ -165,10 +164,9 @@ public class BPItems {
 
         if (!material.contains(":")) result = new ItemStack(Material.valueOf(material));
         else {
+            // Legacy MATERIAL:DATA values aren't a thing on modern versions, just use the material.
             String[] itemData = material.split(":");
             try {
-                result = new ItemStack(Material.valueOf(itemData[0]), 1, Byte.parseByte(itemData[1]));
-            } catch (NoSuchMethodError e) { // Newer versions removed material data values.
                 result = new ItemStack(Material.valueOf(itemData[0]));
             } catch (IllegalArgumentException e) {
                 BPLogger.Console.warn("Could not update item because \"" + itemData[0] + "\" is not a valid material!");
@@ -199,21 +197,18 @@ public class BPItems {
      */
     public static ItemStack getValueHead(String value) {
         ItemStack head = new ItemStack(Material.PLAYER_HEAD);
-        UUID id = new UUID(value.hashCode(), value.hashCode());
 
         try {
             SkullMeta skullMeta = (SkullMeta) head.getItemMeta();
             if (!skullMeta.hasOwner()) skullMeta.setOwningPlayer(Bukkit.getOfflinePlayer("Pulsi_"));
             PlayerProfile profile = skullMeta.getPlayerProfile();
-            ProfileProperty property = new ProfileProperty("textures", value);
-            profile.setProperty(property);
+            profile.setProperty(new ProfileProperty("textures", value));
 
             skullMeta.setPlayerProfile(profile);
             head.setItemMeta(skullMeta);
-            return head;
         } catch (Error | Exception e) {
-            BPLogger.Console.warn(e, "Skull exception");
-            return Bukkit.getUnsafe().modifyItemStack(head, "{SkullOwner:{Id:\"" + id + "\",Properties:{textures:[{Value:\"" + value + "\"}]}}}");
+            BPLogger.Console.warn(e, "Could not apply skull texture, using a plain head.");
         }
+        return head;
     }
 }

@@ -144,6 +144,7 @@ public class BPUtils {
      * @param errorMessage The message to show in the console warning.
      * @return The converted string or fall-back.
      */
+    @SuppressWarnings("unchecked")
     public static <T extends Number> T convertToNumber(String number, T fallBack, String errorMessage) {
         try {
             return switch (fallBack) {
