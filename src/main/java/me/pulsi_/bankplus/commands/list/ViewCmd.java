@@ -69,8 +69,8 @@ public class ViewCmd extends BPCommand {
     @Override
     public BPCmdExecution onExecution(CommandSender s, String[] args) {
 
-        OfflinePlayer target = Bukkit.getOfflinePlayer(args[1]);
-        if (!target.hasPlayedBefore()) {
+        OfflinePlayer target = BPUtils.getOfflinePlayer(args[1]);
+        if (!BPUtils.isValidPlayer(target)) {
             BPMessages.sendIdentifier(s, "Invalid-Player");
             return BPCmdExecution.invalidExecution();
         }
@@ -106,7 +106,7 @@ public class ViewCmd extends BPCommand {
                                 BPUtils.placeValues(target, BPEconomy.getBankBalancesSum(target))
                         );
                     else {
-                        Bank bank = banks.getFirst();
+                        Bank bank = banks.get(0);
                         BPMessages.sendIdentifier(
                                 s,
                                 "Bank-Others",
@@ -123,7 +123,7 @@ public class ViewCmd extends BPCommand {
     @Override
     public List<String> tabCompletion(CommandSender s, String[] args) {
         if (args.length == 3)
-            return BPArgs.getArgs(args, BankUtils.getAvailableBankNames(Bukkit.getOfflinePlayer(args[1])));
+            return BPArgs.getArgs(args, BankUtils.getAvailableBankNames(BPUtils.getOfflinePlayer(args[1])));
         return null;
     }
 }

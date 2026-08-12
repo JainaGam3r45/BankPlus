@@ -7,7 +7,6 @@ import me.pulsi_.bankplus.economy.BPEconomy;
 import me.pulsi_.bankplus.utils.BPUtils;
 import me.pulsi_.bankplus.utils.texts.BPArgs;
 import me.pulsi_.bankplus.utils.texts.BPMessages;
-import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -63,8 +62,8 @@ public class AddCmd extends BPCommand {
 
     @Override
     public BPCmdExecution onExecution(CommandSender s, String[] args) {
-        OfflinePlayer target = Bukkit.getOfflinePlayer(args[1]);
-        if (!target.hasPlayedBefore()) {
+        OfflinePlayer target = BPUtils.getOfflinePlayer(args[1]);
+        if (!BPUtils.isValidPlayer(target)) {
             BPMessages.sendIdentifier(s, "Invalid-Player");
             return BPCmdExecution.invalidExecution();
         }

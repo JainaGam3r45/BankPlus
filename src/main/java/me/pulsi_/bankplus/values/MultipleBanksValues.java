@@ -1,8 +1,8 @@
 package me.pulsi_.bankplus.values;
 
 import me.pulsi_.bankplus.BankPlus;
+import me.pulsi_.bankplus.utils.BPUtils;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.configuration.file.FileConfiguration;
 
 import java.util.List;
@@ -28,7 +28,7 @@ public class MultipleBanksValues {
         autoBanksUnlocker = multipleBanks.getStringList("Auto-Banks-Unlocker");
         previousItemGlowing = multipleBanks.getBoolean("Banks-Gui.Previous-Page.Glowing");
         nextItemGlowing = multipleBanks.getBoolean("Banks-Gui.Next-Page.Glowing");
-        banksGuiTitle = multipleBanks.getComponent("Banks-Gui.Title", MiniMessage.miniMessage());
+        banksGuiTitle = BPUtils.getComponent(multipleBanks, "Banks-Gui.Title");
         previousItemMaterial = multipleBanks.getString("Banks-Gui.Previous-Page.Material");
         nextItemMaterial = multipleBanks.getString("Banks-Gui.Next-Page.Material");
         previousItemDisplayname = multipleBanks.getString("Banks-Gui.Previous-Page.DisplayName");

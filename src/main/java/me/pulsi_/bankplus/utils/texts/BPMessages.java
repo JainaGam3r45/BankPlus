@@ -28,7 +28,7 @@ public class BPMessages {
      * @param text The text.
      */
     public static void sendMessage(Object receiver, String text) {
-        sendMessage(receiver, text, null);
+        sendMessage(receiver, text, (Object[]) null);
     }
 
     /**
@@ -51,7 +51,7 @@ public class BPMessages {
      * @param identifier The identifier of the message.
      */
     public static void sendIdentifier(Object receiver, String identifier) {
-        sendIdentifier(receiver, identifier, null);
+        sendIdentifier(receiver, identifier, (Object[]) null);
     }
 
     /**
@@ -132,7 +132,7 @@ public class BPMessages {
         if (!messages.containsKey("Prefix")) messagesPrefix = BPChat.PREFIX;
         else {
             List<String> prefixes = messages.get("Prefix");
-            messagesPrefix = prefixes.isEmpty() ? BPChat.PREFIX : prefixes.getFirst();
+            messagesPrefix = prefixes.isEmpty() ? BPChat.PREFIX : prefixes.get(0);
         }
 
         alertMissingMessages = config.getBoolean("Enable-Missing-Message-Alert");

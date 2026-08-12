@@ -4,14 +4,11 @@ import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.account.PlayerRegistry;
 import me.pulsi_.bankplus.managers.BPTaskManager;
 import me.pulsi_.bankplus.sql.BPSQL;
-import me.pulsi_.bankplus.utils.texts.BPFormatter;
 import me.pulsi_.bankplus.values.ConfigValues;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
-import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 
-import java.io.File;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
@@ -24,8 +21,11 @@ public class EconomyUtils {
      * @param p The player.
      */
     public static void savePlayer(OfflinePlayer p, boolean unload) {
-        for (BPEconomy economy : BPEconomy.list())
+        for (BPEconomy economy : BPEconomy.list()) {
+            // Skip unloaded holders so a failed/partial load cannot overwrite SQL with defaults.
+            if (!economy.isPlayerLoaded(p)) continue;
             BPSQL.savePlayer(p, economy);
+        }
 
         if (unload) PlayerRegistry.unloadPlayer(p);
     }

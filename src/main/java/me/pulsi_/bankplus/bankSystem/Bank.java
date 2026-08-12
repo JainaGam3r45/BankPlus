@@ -3,9 +3,9 @@ package me.pulsi_.bankplus.bankSystem;
 import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.economy.BPEconomy;
 import me.pulsi_.bankplus.utils.BPLogger;
+import me.pulsi_.bankplus.utils.BPUtils;
 import me.pulsi_.bankplus.values.ConfigValues;
 import me.pulsi_.bankplus.values.MultipleBanksValues;
-import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -125,7 +125,7 @@ public class Bank {
             bankGui.setAvailableBankListItem(null);
             return;
         }
-        bankGui.setTitle(config.getComponent("Title", MiniMessage.miniMessage()));
+        bankGui.setTitle(BPUtils.getComponent(config, "Title"));
         bankGui.setSize(config.getInt("Lines"));
         bankGui.setUpdateDelay(config.getInt("Update-Delay"));
 

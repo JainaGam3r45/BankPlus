@@ -4,6 +4,8 @@ import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.commands.BPCmdExecution;
 import me.pulsi_.bankplus.commands.BPCommand;
 import me.pulsi_.bankplus.economy.BPEconomy;
+import me.pulsi_.bankplus.sql.BPSQL;
+import me.pulsi_.bankplus.utils.BPLogger;
 import me.pulsi_.bankplus.utils.texts.BPArgs;
 import me.pulsi_.bankplus.utils.texts.BPFormatter;
 import me.pulsi_.bankplus.utils.texts.BPMessages;
@@ -12,11 +14,14 @@ import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.configuration.file.YamlConfiguration;
 
+import java.io.File;
+import java.io.IOException;
+import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.Set;
 
 public class TransferCmd extends BPCommand {
 
@@ -76,8 +81,8 @@ public class TransferCmd extends BPCommand {
             return BPCmdExecution.invalidExecution();
         }
 
-        if (!ConfigValues.isMySqlEnabled()) {
-            BPMessages.sendMessage(s, "%prefix% <red>Could not initialize the task, MySQL hasn't been enabled in the config file!");
+        if (BPSQL.getConnection() == null) {
+            BPMessages.sendMessage(s, "%prefix% <red>Could not initialize the task, the database is not connected!");
             return BPCmdExecution.invalidExecution();
         }
 
@@ -104,40 +109,57 @@ public class TransferCmd extends BPCommand {
     }
 
     private void localToExternal() {
-        List<BPEconomy> economies = BPEconomy.list();
         for (OfflinePlayer p : Bukkit.getOfflinePlayers()) {
+            File file = getPlayerFile(p);
+            if (!file.exists()) continue;
 
-            FileConfiguration pConfig = pManager.getPlayerConfig();
-            for (BPEconomy economy : economies) {
+            FileConfiguration config = YamlConfiguration.loadConfiguration(file);
+            for (BPEconomy economy : BPEconomy.list()) {
                 String bankName = economy.getOriginBank().getIdentifier();
-                sqlManager.updatePlayer(
-                        economy.getOriginBank().getIdentifier(),
-                        BPFormatter.getStyledBigDecimal(pConfig.getString("banks." + bankName + ".debt")),
-                        BPFormatter.getStyledBigDecimal(pConfig.getString("banks." + bankName + ".money")),
-                        pConfig.getInt("banks." + bankName + ".level"),
-                        BPFormatter.getStyledBigDecimal(pConfig.getString("banks." + bankName + ".interest"))
-                );
+                String path = "banks." + bankName;
+                if (!config.contains(path)) continue;
+
+                BigDecimal debt = BPFormatter.getStyledBigDecimal(config.getString(path + ".debt"));
+                BigDecimal money = BPFormatter.getStyledBigDecimal(config.getString(path + ".money"));
+                BigDecimal interest = BPFormatter.getStyledBigDecimal(config.getString(path + ".interest"));
+                int level = config.getInt(path + ".level", 1);
+
+                BPSQL.setDebt(p, bankName, debt);
+                BPSQL.setMoney(p, bankName, money);
+                BPSQL.setInterest(p, bankName, interest);
+                BPSQL.setBankLevel(p, bankName, BigDecimal.valueOf(level));
             }
         }
     }
 
     private void externalToLocal() {
-        Set<String> banks = BPEconomy.nameList();
+        File folder = new File(BankPlus.INSTANCE().getDataFolder(), "playerdata");
+        if (!folder.exists()) folder.mkdirs();
+
         for (OfflinePlayer p : Bukkit.getOfflinePlayers()) {
-            BPPlayerManager pManager = new BPPlayerManager(p);
-            if (!pManager.isPlayerRegistered()) continue;
+            if (!BPSQL.isRegistered(p, ConfigValues.getMainGuiName())) continue;
 
-            FileConfiguration config = pManager.getPlayerConfig();
-            SQLPlayerManager pm = new SQLPlayerManager(p);
+            File file = getPlayerFile(p);
+            FileConfiguration config = file.exists() ? YamlConfiguration.loadConfiguration(file) : new YamlConfiguration();
+            if (p.getName() != null) config.set("name", p.getName());
 
-            for (String bankName : banks) {
-                config.set("banks." + bankName + ".debt", pm.getDebt(bankName).toPlainString());
-                config.set("banks." + bankName + ".interest", pm.getOfflineInterest(bankName).toPlainString());
-                config.set("banks." + bankName + ".level", pm.getLevel(bankName));
-                config.set("banks." + bankName + ".money", pm.getMoney(bankName).toPlainString());
+            for (String bankName : BPEconomy.nameList()) {
+                config.set("banks." + bankName + ".debt", BPSQL.getDebt(p, bankName).toPlainString());
+                config.set("banks." + bankName + ".interest", BPSQL.getInterest(p, bankName).toPlainString());
+                config.set("banks." + bankName + ".level", BPSQL.getBankLevel(p, bankName));
+                config.set("banks." + bankName + ".money", BPSQL.getMoney(p, bankName).toPlainString());
             }
 
-            pManager.savePlayerFile(config, pManager.getPlayerFile());
+            try {
+                config.save(file);
+            } catch (IOException e) {
+                BPLogger.Console.error(e, "Could not save player file for " + p.getName() + ".");
+            }
         }
+    }
+
+    private File getPlayerFile(OfflinePlayer p) {
+        String id = ConfigValues.isStoringUUIDs() ? p.getUniqueId().toString() : p.getName();
+        return new File(BankPlus.INSTANCE().getDataFolder(), "playerdata" + File.separator + id + ".yml");
     }
 }

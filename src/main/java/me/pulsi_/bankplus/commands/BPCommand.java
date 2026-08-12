@@ -31,7 +31,7 @@ public abstract class BPCommand {
     private final Set<String> confirm = new HashSet<>();
 
     public BPCommand(FileConfiguration commandsConfig, String commandID) {
-        this(commandsConfig, commandID, null);
+        this(commandsConfig, commandID, (String[]) null);
     }
 
     public BPCommand(FileConfiguration commandsConfig, String commandID, String... aliases) {

@@ -2,7 +2,6 @@ package me.pulsi_.bankplus.bankSystem;
 
 import com.destroystokyo.paper.profile.PlayerProfile;
 import com.destroystokyo.paper.profile.ProfileProperty;
-import io.papermc.paper.datacomponent.DataComponentTypes;
 import me.pulsi_.bankplus.utils.BPLogger;
 import me.pulsi_.bankplus.utils.texts.BPChat;
 import net.kyori.adventure.text.Component;
@@ -10,6 +9,7 @@ import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -17,7 +17,6 @@ import org.bukkit.inventory.meta.SkullMeta;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 /**
  * Utility class about ItemStacks and Material generation.
@@ -77,7 +76,7 @@ public class BPItems {
         }
         item.setItemMeta(meta);
 
-        if (itemSection.getBoolean(GLOWING_KEY)) item.setData(DataComponentTypes.ENCHANTMENT_GLINT_OVERRIDE, true);
+        if (itemSection.getBoolean(GLOWING_KEY)) applyGlowing(item);
         return item;
     }
 
@@ -120,8 +119,26 @@ public class BPItems {
         }
         item.setItemMeta(meta);
 
-        if (itemSection.getBoolean(GLOWING_KEY)) item.setData(DataComponentTypes.ENCHANTMENT_GLINT_OVERRIDE, true);
+        if (itemSection.getBoolean(GLOWING_KEY)) applyGlowing(item);
         return item;
+    }
+
+    /**
+     * Apply glowing using Paper data components when available, otherwise a hidden enchant.
+     */
+    private static void applyGlowing(ItemStack item) {
+        try {
+            Class<?> types = Class.forName("io.papermc.paper.datacomponent.DataComponentTypes");
+            Object glint = types.getField("ENCHANTMENT_GLINT_OVERRIDE").get(null);
+            Class<?> componentType = Class.forName("io.papermc.paper.datacomponent.DataComponentType");
+            item.getClass().getMethod("setData", componentType, Object.class).invoke(item, glint, Boolean.TRUE);
+        } catch (Throwable t) {
+            ItemMeta meta = item.getItemMeta();
+            if (meta == null) return;
+            meta.addEnchant(Enchantment.LURE, 1, true);
+            meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
+            item.setItemMeta(meta);
+        }
     }
 
     /**
@@ -147,9 +164,10 @@ public class BPItems {
 
         if (!material.contains(":")) result = new ItemStack(Material.valueOf(material));
         else {
+            // Legacy MATERIAL:DATA values aren't a thing on modern versions, just use the material.
             String[] itemData = material.split(":");
             try {
-                result = new ItemStack(Material.valueOf(itemData[0]), 1, Byte.parseByte(itemData[1]));
+                result = new ItemStack(Material.valueOf(itemData[0]));
             } catch (IllegalArgumentException e) {
                 BPLogger.Console.warn("Could not update item because \"" + itemData[0] + "\" is not a valid material!");
             }
@@ -179,21 +197,18 @@ public class BPItems {
      */
     public static ItemStack getValueHead(String value) {
         ItemStack head = new ItemStack(Material.PLAYER_HEAD);
-        UUID id = new UUID(value.hashCode(), value.hashCode());
 
         try {
             SkullMeta skullMeta = (SkullMeta) head.getItemMeta();
             if (!skullMeta.hasOwner()) skullMeta.setOwningPlayer(Bukkit.getOfflinePlayer("Pulsi_"));
             PlayerProfile profile = skullMeta.getPlayerProfile();
-            ProfileProperty property = new ProfileProperty("textures", value);
-            profile.setProperty(property);
+            profile.setProperty(new ProfileProperty("textures", value));
 
             skullMeta.setPlayerProfile(profile);
             head.setItemMeta(skullMeta);
-            return head;
         } catch (Error | Exception e) {
-            BPLogger.Console.warn(e, "Skull exception");
-            return Bukkit.getUnsafe().modifyItemStack(head, "{SkullOwner:{Id:\"" + id + "\",Properties:{textures:[{Value:\"" + value + "\"}]}}}");
+            BPLogger.Console.warn(e, "Could not apply skull texture, using a plain head.");
         }
+        return head;
     }
 }

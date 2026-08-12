@@ -7,6 +7,7 @@ import me.pulsi_.bankplus.bankSystem.BankUtils;
 import me.pulsi_.bankplus.utils.texts.BPFormatter;
 import me.pulsi_.bankplus.utils.texts.BPMessages;
 import me.pulsi_.bankplus.values.ConfigValues;
+import me.clip.placeholderapi.PlaceholderAPI;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.title.Title;
@@ -27,6 +28,51 @@ import java.util.Collection;
 import java.util.List;
 
 public class BPUtils {
+
+    /**
+     * Read a MiniMessage component from the config.
+     * Falls back to string deserialize on older Paper builds without getComponent.
+     */
+    public static Component getComponent(FileConfiguration config, String path) {
+        try {
+            return config.getComponent(path, MiniMessage.miniMessage());
+        } catch (NoSuchMethodError e) {
+            String value = config.getString(path);
+            return value == null || value.isEmpty() ? Component.empty() : MiniMessage.miniMessage().deserialize(value);
+        }
+    }
+
+    /**
+     * Resolve a player by name without relying only on hasPlayedBefore().
+     * On newer Paper builds, getOfflinePlayer(name) may return a player that never
+     * joined this server even when they are online or cached.
+     */
+    public static OfflinePlayer getOfflinePlayer(String name) {
+        if (name == null || name.isEmpty()) return null;
+
+        Player online = Bukkit.getPlayerExact(name);
+        if (online != null) return online;
+
+        try {
+            OfflinePlayer cached = Bukkit.getOfflinePlayerIfCached(name);
+            if (cached != null) return cached;
+        } catch (NoSuchMethodError ignored) {
+            // Older servers don't have getOfflinePlayerIfCached.
+        }
+
+        for (OfflinePlayer offline : Bukkit.getOfflinePlayers()) {
+            if (offline.getName() != null && offline.getName().equalsIgnoreCase(name)) return offline;
+        }
+
+        return Bukkit.getOfflinePlayer(name);
+    }
+
+    /**
+     * Check if the offline player is valid for BankPlus commands.
+     */
+    public static boolean isValidPlayer(OfflinePlayer player) {
+        return player != null && (player.isOnline() || player.hasPlayedBefore());
+    }
 
     /**
      * BankPlus does not accept negative numbers, if a number is lower than 0, it will return true.
@@ -98,6 +144,7 @@ public class BPUtils {
      * @param errorMessage The message to show in the console warning.
      * @return The converted string or fall-back.
      */
+    @SuppressWarnings("unchecked")
     public static <T extends Number> T convertToNumber(String number, T fallBack, String errorMessage) {
         try {
             return switch (fallBack) {
@@ -125,6 +172,10 @@ public class BPUtils {
      */
     public static void sendTitle(String titleString, Player p) {
         if (titleString == null || p == null) return;
+
+        titleString = BPMessages.applyMessagesPrefix(titleString);
+        if (BankPlus.INSTANCE().isPlaceholderApiHooked())
+            titleString = PlaceholderAPI.setPlaceholders(p, titleString);
 
         MiniMessage mm = MiniMessage.miniMessage();
         Component title, subtitle;

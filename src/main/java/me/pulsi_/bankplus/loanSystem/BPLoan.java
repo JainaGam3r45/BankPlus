@@ -136,6 +136,10 @@ public class BPLoan {
         return instalmentsPoint;
     }
 
+    public LoanType getLoanType() {
+        return loanType;
+    }
+
     public void setSender(OfflinePlayer sender) {
         this.sender = sender;
     }

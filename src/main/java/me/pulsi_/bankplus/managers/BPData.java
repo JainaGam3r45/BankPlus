@@ -43,7 +43,7 @@ public class BPData {
 
         BPLogger.Console.log("");
         BPLogger.Console.log("    " + BPChat.PREFIX + " <green>Enabling plugin...");
-        BPLogger.Console.log("    <green>Running on version <white>" + plugin.getDescription().getVersion() + "</white>!");
+        BPLogger.Console.log("    <green>Running on version <white>" + plugin.getPluginMeta().getVersion() + "</white>!");
         BPLogger.Console.log("    <green>Detected server version: <white>" + BankPlus.getServerVersion());
         BPLogger.Console.log("    <green>Setting up the plugin...");
         BPLogger.Console.log("");

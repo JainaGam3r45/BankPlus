@@ -35,7 +35,7 @@ public class BPPlaceholders extends PlaceholderExpansion {
 
     @Override
     public String getVersion() {
-        return BankPlus.INSTANCE().getDescription().getVersion();
+        return BankPlus.INSTANCE().getPluginMeta().getVersion();
     }
 
     @Override

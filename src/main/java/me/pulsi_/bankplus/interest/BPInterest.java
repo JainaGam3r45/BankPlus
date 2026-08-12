@@ -148,13 +148,7 @@ public class BPInterest {
          */
         public static boolean offlineTimeExpired(OfflinePlayer p) {
             if (ConfigValues.getOfflineInterestLimit() <= 0L) return false;
-            long lastSeen;
-            try {
-                lastSeen = p.getLastSeen();
-            } catch (NoSuchMethodError e) {
-                lastSeen = p.getLastPlayed();
-            }
-            return (System.currentTimeMillis() - lastSeen) > ConfigValues.getOfflineInterestLimit();
+            return (System.currentTimeMillis() - p.getLastSeen()) > ConfigValues.getOfflineInterestLimit();
         }
 
     }

@@ -18,6 +18,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
@@ -514,8 +515,16 @@ public class BankUtils {
             vaultEconomy.withdrawPlayer(p, cost.doubleValue());
         }
 
-        if (isRemovingRequiredItems(bank, nextLevel) && canRemoveSafely)
-            for (Bank.RequiredItem requiredItem : requiredItems) p.getInventory().removeItem(requiredItem.item);
+        if (isRemovingRequiredItems(bank, nextLevel) && canRemoveSafely) {
+            PlayerInventory inventory = p.getInventory();
+
+            for (Bank.RequiredItem requiredItem : requiredItems) {
+                ItemStack item = requiredItem.item.clone();
+                item.setAmount(requiredItem.amount);
+
+                inventory.removeItem(item);
+            }
+        }
 
         setLevel(bank, p, nextLevel);
         BPMessages.sendIdentifier(p, "Bank-Upgraded");

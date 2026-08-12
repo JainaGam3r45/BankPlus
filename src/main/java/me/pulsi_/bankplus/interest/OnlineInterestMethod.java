@@ -67,7 +67,7 @@ public class OnlineInterestMethod extends BPInterest.InterestMethod {
 
         if (availableBanks.size() > 1) BPMessages.sendMessage(p, MessageValues.getMultiInterestMoney(), BPUtils.placeValues(p, interestAmount));
         else {
-            if (BankUtils.isFull(availableBanks.getFirst(), p) && !ConfigValues.isGivingInterestOnVaultBalance()) {
+            if (BankUtils.isFull(availableBanks.get(0), p) && !ConfigValues.isGivingInterestOnVaultBalance()) {
                 BPMessages.sendMessage(p, MessageValues.getInterestBankFull(), BPUtils.placeValues(p, interestAmount));
                 return;
             }
