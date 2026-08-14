@@ -89,7 +89,7 @@ public class BankClickMethod {
 
                     BigDecimal amount;
                     try {
-                        if (!value.endsWith("%")) amount = new BigDecimal(value);
+                        if (!value.endsWith("%")) amount = BPFormatter.getStyledBigDecimal(value);
                         else {
                             BigDecimal percentage = BPFormatter.getStyledBigDecimal(value.replace("%", "")).divide(BigDecimal.valueOf(100));
                             amount = economy.getBankBalance(p).multiply(percentage);
