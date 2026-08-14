@@ -82,7 +82,7 @@ public class BankClickMethod {
                 case "[withdraw]": {
                     if (ConfigValues.isGuiActionsNeedingPermissions() && !BPUtils.hasPermission(p, "bankplus.withdraw")) return;
 
-                    if (value.equals("CUSTOM")) {
+                    if (value.equalsIgnoreCase("CUSTOM")) {
                         economy.customWithdraw(p);
                         continue;
                     }
