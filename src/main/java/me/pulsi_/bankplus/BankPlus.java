@@ -61,10 +61,10 @@ public final class BankPlus extends JavaPlugin {
                 return;
             }
             BPLogger.Console.log("");
-            BPLogger.Console.log("<red>Cannot load " + BPChat.PREFIX + ", No economy plugin found.");
-            BPLogger.Console.log("<red>Please download an economy plugin to use this plugin.");
+            BPLogger.Console.log("<red>" + BPChat.PREFIX + " didn't find an economy plugin.");
+            BPLogger.Console.log("<red>Vault is installed, but nothing is hooked (EssentialsX, CMI, ...).");
+            BPLogger.Console.log("<red>The plugin will stay loaded. Add an economy plugin and restart.");
             BPLogger.Console.log("");
-            getServer().getPluginManager().disablePlugin(this);
             return;
         }
 
@@ -115,7 +115,7 @@ public final class BankPlus extends JavaPlugin {
 
     @Override
     public void onDisable() {
-        bpData.shutdownPlugin();
+        if (bpData != null) bpData.shutdownPlugin();
     }
 
     public static BankPlus INSTANCE() {
